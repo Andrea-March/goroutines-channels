@@ -1,0 +1,46 @@
+package router
+
+import (
+	"github.com/julienschmidt/httprouter"
+	"github.com/rs/cors"
+	"net/http"
+)
+
+
+type NoCache struct {
+	Handler http.Handler
+}
+func (m NoCache) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Add("Pragma", "no-cache")
+	w.Header().Add("Expires", "0")
+	m.Handler.ServeHTTP(w, r)
+}
+
+type Router struct {
+	*httprouter.Router
+	Shutdown        func()
+}
+
+func SupportCORS(handler http.Handler) http.Handler {
+	c := cors.New(cors.Options{
+		AllowCredentials: true,
+		AllowOriginFunc: func(string) bool {
+			return true
+		},
+		AllowedHeaders: []string{"Origin", "X-Requested-With", "Content-Type", "Accept"}})
+	return c.Handler(handler)
+}
+
+func New() (r *Router, err error) {
+	r = &Router{
+		Router: httprouter.New(),
+	}
+	r.GET("/", serveIndex)
+	return r, nil
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	http.ServeFile(w, r, "static/index.html")
+}
+
