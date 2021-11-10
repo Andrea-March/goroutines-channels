@@ -27,7 +27,6 @@ func loadConfig() (*config.Configuration, error) {
 	return config.New(v)
 }
 
-
 func serve(cfg *config.Configuration) error {
 	r, err := router.New()
 	if err!= nil {

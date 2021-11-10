@@ -37,10 +37,14 @@ func New() (r *Router, err error) {
 		Router: httprouter.New(),
 	}
 	r.GET("/", serveIndex)
+	r.POST("/go",executeRoutine)
 	return r, nil
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	http.ServeFile(w, r, "static/index.html")
+	http.ServeFile(w,r,"static/index.html")
 }
 
+func executeRoutine(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+	w.Write([]byte("Executing Routine"))
+}

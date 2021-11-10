@@ -72,9 +72,12 @@ func shutdownAfterSignals(server *http.Server, stopper <-chan os.Signal, done ch
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	var s struct{}
 	glog.Infof("Stopping %s because of signal: %s", server.Addr, sig.String())
+
+
+
+
 	if err := server.Shutdown(ctx); err != nil {
 		glog.Errorf("Failed to shutdown %s: %v", server.Addr, err)
 	}
