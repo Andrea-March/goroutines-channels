@@ -1,10 +1,17 @@
 package router
 
 import (
+	"encoding/json"
+	"github.com/golang/glog"
 	"github.com/julienschmidt/httprouter"
+	"github.com/routines"
 	"github.com/rs/cors"
 	"net/http"
 )
+
+type Message struct {
+	Text string
+}
 
 
 type NoCache struct {
@@ -46,5 +53,11 @@ func serveIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func executeRoutine(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
-	w.Write([]byte("Executing Routine"))
+	w.Write([]byte("Executing Routine..."))
+	message := Message{}
+	err := json.NewDecoder(r.Body).Decode(&message)
+	if err != nil {
+		glog.Error("Error in parsing request, exiting...")
+	}
+	go routines.ExecuteGoRoutine(message.Text)
 }
