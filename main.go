@@ -8,7 +8,6 @@ import (
 )
 
 func main()  {
-
 	cfg, err := loadConfig()
 	if err != nil {
 		panic("Error in loading configuration!")

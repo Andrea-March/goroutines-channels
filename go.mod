@@ -6,6 +6,8 @@ replace github.com/server => ./server
 
 replace github.com/router => ./router
 
+replace github.com/routines => ./routines
+
 go 1.13
 
 require (
