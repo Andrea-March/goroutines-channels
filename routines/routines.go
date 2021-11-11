@@ -4,25 +4,24 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"sync"
+	"time"
 )
 
 type EventChannel struct {
 	total       chan int
 	endCh       chan int
+	message 	string
 	muxGzBuffer sync.RWMutex
 }
 
-func (ch *EventChannel) start() {
+func (c *EventChannel) start() {
 	for{
-		glog.Info("HERE")
 		select {
 		case <- c.endCh:
-			c.flush()
-			glog.Info("Three goroutines finished, printing results...")
-			glog.Info(fmt.Sprintf("Total esecuted: %-5v, messages: %s", total, messages))
-		case <- c.total:
-			glog.Info(fmt.Sprintf("Goroutine finished, %v missing to reach total",3-total))
-			glog.Info(fmt.Sprintf("Total esecuted: %-5v, messages: %s", total, messages))
+			glog.Info(fmt.Sprintf("Goroutine %s finished", c.message))
+			//c.flush()
+		case total := <-c.total:
+			glog.Info(fmt.Sprintf("Iteration finished for routine %s, %v iteration(s) missing to reach total",c.message, 3-total))
 		}
 	}
 }
@@ -37,28 +36,25 @@ func (c *EventChannel) flush() {
 	defer c.reset()
 }
 
-var total int
-var messages []string
-var c EventChannel
-
-func init()  {
-	go c.start()
-}
-
 func ExecuteGoRoutine(message string) {
-	glog.Info(fmt.Sprintf("Executing goroutine, iteration %v, message %s", (total+1), message))
+	glog.Info(fmt.Sprintf("Executing goroutine: %s", message))
 	executeTask(message)
 }
 
-func executeTask(message string) EventChannel{
+func executeTask(message string) {
+	c := EventChannel{
+		total: make(chan int),
+		endCh: make(chan int),
+		message: message,
+	}
+	defer c.start()
+	total := 0
 	go func() {
-		total++
-		messages = append(messages, message)
-		if total>= 3{
-			c.endCh <-0
-			return
+		for i:= 0; i<3; i++{
+			time.Sleep(5*time.Second)
+			total++
+			c.total <- total
 		}
-		c.total <- total
+		c.endCh <- 0
 	}()
-	return c
 }
